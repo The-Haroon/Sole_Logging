@@ -82,7 +82,7 @@ class SoleLog:
         if self.__formatJsonLogs:
             self.sessionUuid = str(uuid.uuid4())
         if self.__formatJsonLogs:
-            self.sessionLogs = {}
+            self.__sessionLogs = {}
         try:
             if logDirPath is not None:
                 self.__logDir = os.path.abspath(logDirPath)
@@ -98,13 +98,12 @@ class SoleLog:
                     self.rootDir = os.path.join(self.__logDir, f"{self.__logDirName}")
                 else:
                     self.rootDir = os.path.join(self.__logDir)
-
-                self.sessionStartTime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                self.__sessionStartTime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 if self.__logSaveFormat == "json":
-                    self.__logFile = os.path.join(self.rootDir, fr"{self.__logDirName}_{self.sessionStartTime}({self.__sessions}).json")
+                    self.__logFile = os.path.join(self.rootDir, fr"{self.__logDirName}_{self.__sessionStartTime}({self.__sessions}).json")
                     self.__sessions += 1
                 elif self.__logSaveFormat == "txt":
-                    self.__logFile = os.path.join(self.rootDir, f"{self.__logDirName}_{self.sessionStartTime}({self.__sessions}).txt")
+                    self.__logFile = os.path.join(self.rootDir, f"{self.__logDirName}_{self.__sessionStartTime}({self.__sessions}).txt")
                     self.__sessions += 1
                 else:
                     raise ValueError("Only accepts: 'json' and 'txt' format")
@@ -238,8 +237,8 @@ class SoleLog:
                 sys.exit(1)
 
             if self.__formatJsonLogs:
-                if self.sessionUuid not in self.sessionLogs:
-                    self.sessionLogs[self.sessionUuid] = []
+                if self.sessionUuid not in self.__sessionLogs:
+                    self.__sessionLogs[self.sessionUuid] = []
 
             if explicitLogConsole:
                 return generatedLog
@@ -290,9 +289,9 @@ class SoleLog:
             with self.__lock:
                 if os.path.getsize(self.__logFile) >= self.maxLogSize:
                     if self.__logSaveFormat == "json":
-                        self.__logFile = os.path.join(self.rootDir, fr"{self.__logDirName}_{self.sessionStartTime}({self.__sessions}).json")
+                        self.__logFile = os.path.join(self.rootDir, fr"{self.__logDirName}_{self.__sessionStartTime}({self.__sessions}).json")
                     elif self.__logSaveFormat == "txt":
-                        self.__logFile = os.path.join(self.rootDir, fr"{self.__logDirName}_{self.sessionStartTime}({self.__sessions}).txt")
+                        self.__logFile = os.path.join(self.rootDir, fr"{self.__logDirName}_{self.__sessionStartTime}({self.__sessions}).txt")
                     self.__sessions += 1
                     with open(self.__logFile, "w") as _:
                         pass
@@ -333,10 +332,10 @@ class SoleLog:
                 self.__logRotation()
                 with self.__lock:
                     if self.__formatJsonLogs:
-                        self.sessionLogs[self.sessionUuid].append(collectedLogs)
+                        self.__sessionLogs[self.sessionUuid].append(collectedLogs)
                     if self.__logSaveFormat == "json" and self.__formatJsonLogs:
                         with open(self.__logFile, "w", encoding="utf-8") as dumpLogJson:
-                            json.dump(self.sessionLogs, dumpLogJson, indent=2)
+                            json.dump(self.__sessionLogs, dumpLogJson, indent=2)
 
                     elif self.__logSaveFormat == "json" and not self.__formatJsonLogs:
                         with open(self.__logFile, "a", encoding="utf-8") as noFormatJson:
@@ -351,6 +350,12 @@ class SoleLog:
                 _ = fileWriteException
                 self.__selfException(f"Error writing logs to file. Logging has failed and no logs were written")
                 sys.exit(1)
+
+    def getSessionStartTime(self):
+        return self.__sessionStartTime
+
+    def logFilePath(self):
+        return self.__logFile
 
     def exception(self, message, showTime:bool = None, showLogInConsole:bool = None):
         """
@@ -406,8 +411,6 @@ class SoleLog:
             print(f"{self.__LOGS['BOLD']}>>>> {self.__LOGS['STYLE']}Logger shutdown completed successfully.{self.__LOGS['RESET']}")
         except Exception as deleteException:
             print(f"{self.__LOGS['BOLD']}>>>> {self.__LOGS['ERROR']}Can't Delete {self.__logFile} But there are No Logs Written!.{deleteException}{self.__LOGS['RESET']}")
-
-
 
     def INFO(self, message, showTime:bool = None, showLogInConsole:bool = None):
         """
