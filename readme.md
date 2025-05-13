@@ -41,7 +41,7 @@ logger.WARNING("This is a warning")
 logger.ERROR("An error occurred")
 logger.CRITICAL("Critical failure!")
 
-# Gracefully shutdown the logger
+# Gracefully shutdown the userLogger
 logger.close()
 ```
 ## Log Levels

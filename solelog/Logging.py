@@ -14,7 +14,7 @@ class SoleLog:
     def __init__(self, colouredLog:bool,showTime:bool,logPriority:str = "DEBUG", logSaveFormat:str = "json", logDirPath:str = None,
                  logDirName:str = "myLog",flushInterval:float = 0,maxLogSizeMb:float = 5, showLogInConsole:bool = True,formatJsonLog:bool = False,makeNewLogDir:bool = True):
         """
-        Initializes the logger instance with the specified configuration.
+        Initializes the userLogger instance with the specified configuration.
 
         Args:
             colouredLog (bool): Whether to display logs in color for terminal output.
@@ -166,14 +166,14 @@ class SoleLog:
                              Overrides the default instance-level `showTime` setting.
             explicitLogConsole (bool, optional): Whether to force showing the log in the console.
                                                  Overrides the default `showLogInConsole` setting.
-                                                 If not provided, the logger uses the instance-level default.
+                                                 If not provided, the userLogger uses the instance-level default.
 
         Returns:
             str or None: Returns the formatted log string **only if** it's meant to be shown in the console;
                          otherwise, returns `None`.
 
         Notes:
-            - **Log Filtering:** This method respects the `logPriority` setting of the logger. If the log's
+            - **Log Filtering:** This method respects the `logPriority` setting of the userLogger. If the log's
               severity is lower than the configured priority, it is ignored and not saved or shown.
               For example, if `logPriority="WARNING"`, then "DEBUG" and "INFO" logs will be skipped.
             - **Console Output Rules:**
@@ -307,7 +307,7 @@ class SoleLog:
 
             This method is intended to run in a background thread. It retrieves log
             entries from an internal queue and writes them to the specified log file
-            in either JSON or plain text format, based on the logger configuration.
+            in either JSON or plain text format, based on the userLogger configuration.
 
             Behavior:
                 - If `__formatJsonLogs` is True, logs are appended to a session-based
@@ -378,7 +378,7 @@ class SoleLog:
             try:
                 1 / 0
             except ZeroDivisionError:
-                logger.exception("An error occurred while dividing numbers")
+                userLogger.exception("An error occurred while dividing numbers")
         """
         fullmsg = f"{message}\n{traceback.format_exc()}"
         log = self.__log(logType="ERROR", message=fullmsg, showTime=showTime, explicitLogConsole=showLogInConsole)
@@ -402,7 +402,7 @@ class SoleLog:
         self.__writer.join()
         with open(self.__logFile,"r") as checkSize:
             if checkSize.read():
-                print(f"\n{self.__LOGS['BOLD']}>>>> {self.__LOGS['STYLE']}Logger shutdown completed successfully.")
+                print(f"\n{self.__LOGS['BOLD']}>>>> {self.__LOGS['STYLE']}Logger shutdown completed successfully.{self.__LOGS['RESET']}")
                 return
 
         print(f"\n{self.__LOGS['BOLD']}>>>> {self.__LOGS['WARNING']}No Logs in {self.__logFile}. Deleting...{self.__LOGS['RESET']}")
